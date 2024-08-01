@@ -1,5 +1,5 @@
 class Game {
-    constructor(gameLevel, localGameDataObject, moves, board) {
+    constructor(gameLevel, localGameDataObject, moves, board, img) {
         this.container = document.querySelector(".board");
         this.gameLevel = gameLevel;
         this.START_BOARD_ARR = Game.generateStartBoard(this.gameLevel);
@@ -10,7 +10,7 @@ class Game {
         this.move = this.move.bind(this);
         this.moveCount = moves || 0;
 
-        this.init(this.board);
+        this.init(this.board, img);
 
         this.renderResultsTable(this.localGameData);
 
@@ -47,33 +47,34 @@ class Game {
         document.querySelector("#solve").disabled = false;
 
         document.querySelector("#solve").addEventListener("click", () => {
-            const elem = createElement(
-                "div",
-                {
-                    className: "popup",
-                    children: [
-                        createElement(
-                            "p",
-                            {},
-                            `Are you sure? Your game result will not be recorded!`
-                        ),
-                        createElement("button", {}, "Yes, solve this puzzle"),
-                        createElement("button", {}, "No, I will try harder"),
-                    ],
-                },
-                ""
-            );
-
-            elem.children[1].addEventListener("click", () => {
-                elem.style.display = "none";
-                this.solve();
-            });
-            elem.children[2].onclick = () => {
-                elem.style.display = "none";
-                document.body.classList.remove("innactive");
-            };
-            render(elem, document.querySelector(".popups"));
-            document.body.classList.add("innactive");
+            this.solve();
+            // const elem = createElement(
+            //     "div",
+            //     {
+            //         className: "popup",
+            //         children: [
+            //             createElement(
+            //                 "p",
+            //                 {},
+            //                 `Are you sure? Your game result will not be recorded!`
+            //             ),
+            //             createElement("button", {}, "Yes, solve this puzzle"),
+            //             createElement("button", {}, "No, I will try harder"),
+            //         ],
+            //     },
+            //     ""
+            // );
+            //
+            // elem.children[1].addEventListener("click", () => {
+            //     elem.style.display = "none";
+            //     this.solve();
+            // });
+            // elem.children[2].onclick = () => {
+            //     elem.style.display = "none";
+            //     document.body.classList.remove("innactive");
+            // };
+            // render(elem, document.querySelector(".popups"));
+            // document.body.classList.add("innactive");
         });
 
         document.querySelector("#load").addEventListener("click", () => {
@@ -87,12 +88,14 @@ class Game {
             });
         });
     }
+
     static convertArrayToBoard(boardArray) {
         return boardArray.reduce((board, cell, idx) => {
             board[idx] = cell;
             return board;
         }, {});
     }
+
     static generateStartBoard(gameLevel) {
         let startBoardArr = [];
 
@@ -103,6 +106,7 @@ class Game {
 
         return startBoardArr;
     }
+
     canBoardWin(array) {
         // Check if Start board is the same after ramdomize
         let startBoardPosition = array.every((el, idx) => {
@@ -144,6 +148,7 @@ class Game {
             return parity % 2 == 0;
         }
     }
+
     checkWin() {
         return this.START_BOARD_ARR.every((number, index) =>
             this.board[index] !== "empty"
@@ -151,6 +156,7 @@ class Game {
                 : this.board[index] === number
         );
     }
+
     createRandomBoard() {
         let randomBoard = this.START_BOARD_ARR.concat().sort(() => Math.random() - 0.5);
 
@@ -160,6 +166,7 @@ class Game {
 
         return this.createRandomBoard();
     }
+
     getIndex(number) {
         for (let index = 0; index < this.gameLevel ** 2; index++) {
             if (this.board[index] === "empty") {
@@ -171,6 +178,7 @@ class Game {
             }
         }
     }
+
     getMoveData(number) {
         if (number === "empty") return undefined;
         const currentIndex = this.getIndex(number),
@@ -189,12 +197,14 @@ class Game {
             to: sublingsItems[possibleMove],
         };
     }
+
     getPosition(index) {
         return {
             row: Math.floor(index / this.gameLevel),
             cell: index % this.gameLevel,
         };
     }
+
     getSiblingsIndex(currentIndex) {
         const leftItemIndex = currentIndex % this.gameLevel === 0 ? null : currentIndex - 1,
             rightItemIndex =
@@ -211,18 +221,44 @@ class Game {
             BOTTOM: bottomItemIndex,
         };
     }
-    init(board) {
+
+    init(board, img) {
         const cells = [];
+
+        // load image asset
+        // split image into 16 pieces
+        let canvas = document.createElement("canvas");
+        let ctx = canvas.getContext("2d");
+        let imgWidth = img.width;
+        let imgHeight = img.height;
+        let pieceWidth = imgWidth / this.gameLevel;
+        let pieceHeight = imgHeight / this.gameLevel;
+        let pieces = [];
+        for (let x = 0; x < this.gameLevel; x++) {
+            for (let y = 0; y < this.gameLevel; y++) {
+                let p = document.createElement("canvas");
+                p.width = pieceWidth;
+                p.height = pieceHeight;
+                p.getContext("2d").drawImage(img, -y * pieceWidth, -x * pieceHeight);
+                pieces.push(p);
+            }
+        }
+
+        // sort pieces array
+
+
 
         for (let i = 0; i <= this.gameLevel ** 2 - 1; i++) {
             const number = board[i];
 
+            console.log(number);
             if (number !== "empty") {
                 const cell = new Cell(
                     {
                         number,
                         onMove: this.move,
                     },
+                    pieces[number-1],
                     this.container,
                     this.gameLevel
                 );
@@ -236,6 +272,7 @@ class Game {
         this.render();
         render(cells, this.container);
     }
+
     moveControls(event) {
         let from;
         if (event.code === "ArrowUp" || event.type === "swipeup") from = "BOTTOM";
@@ -249,6 +286,7 @@ class Game {
             this.move(this.board[siblings[from]]);
         }
     }
+
     move(cell) {
         if (this.isWin) {
             return;
@@ -263,9 +301,10 @@ class Game {
         this.render();
 
         if (this.checkWin()) {
-            this.win();
+            // this.win();
         }
     }
+
     render() {
         for (let i = 0; i <= this.gameLevel ** 2 - 1; i++) {
             const Cell = this.board[i];
@@ -279,6 +318,7 @@ class Game {
         }
         document.querySelector(".game-stats__moves--value").textContent = this.moveCount;
     }
+
     renderResultsTable(resultsObject) {
         document.querySelector(
             ".game-stats__local--level"
@@ -286,6 +326,7 @@ class Game {
         document.querySelector(".game-stats__local--value").textContent =
             resultsObject[this.gameLevel].bestScore || "-";
     }
+
     sumbitGlobalScoreData(playerName) {
         var myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -314,6 +355,7 @@ class Game {
             })
             .catch((error) => console.log("error", error));
     }
+
     renderConsoleBoard() {
         let boardArray = [];
         for (let key in this.board) {
@@ -342,6 +384,7 @@ class Game {
             console.log(rowStr);
         }
     }
+
     solve() {
         this.isComplitedByHuman = false;
 
@@ -387,6 +430,7 @@ class Game {
                 setTimeout(moveCellSolution.bind(this), 100);
             }
         }
+
         moveCellSolution.call(this);
     }
 

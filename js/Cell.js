@@ -1,6 +1,7 @@
 class Cell {
-    constructor(props, container, gameLevel) {
+    constructor(props, img, container, gameLevel) {
         this.props = props;
+        this.img = img;
         this.gameLevel = gameLevel;
         this.createElement(container, gameLevel);
         this.render();
@@ -26,8 +27,13 @@ class Cell {
             {
                 className: "cell",
             },
-            this.props.number
         );
+        this.img.style.width = "100%";
+        this.img.style.height = "100%";
+
+        this.element.appendChild(this.img);
+        // create element shows image
+
         this.element.addEventListener("click", this.clickHandler.bind(this));
 
         this.element.style.width = `${cellWidth}%`;

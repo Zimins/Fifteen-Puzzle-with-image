@@ -5,13 +5,13 @@ function getLocalGameData() {
                 isAccessible: true,
             },
             3: {
-                isAccessible: false,
+                isAccessible: true,
             },
             4: {
-                isAccessible: false,
+                isAccessible: true,
             },
             5: {
-                isAccessible: false,
+                isAccessible: true,
             },
             6: {
                 isAccessible: false,
@@ -81,14 +81,18 @@ renderGameLevels(getLocalGameData());
 function startGame(props) {
     const { level, localGameDataObject, moves, board } = props;
 
-    const game = new Game(level, localGameDataObject, moves, board);
-    game.render();
-    getGlobalScoreData(level);
-    document.querySelector(".controls__main").classList.add("none");
-    document.querySelector(".controls__game").classList.remove("none");
-    document.querySelector(".board").classList.remove("game-over");
-    document.querySelector(".game-stats").classList.remove("hidden");
-    if (localStorage.getItem("gameProcess")) document.querySelector("#load").disabled = false;
+    let img = new Image();
+    img.src = "/img/rdj.webp";
+    img.onload = function () {
+        const game = new Game(level, localGameDataObject, moves, board, img);
+        game.render();
+        getGlobalScoreData(level);
+        document.querySelector(".controls__main").classList.add("none");
+        document.querySelector(".controls__game").classList.remove("none");
+        document.querySelector(".board").classList.remove("game-over");
+        document.querySelector(".game-stats").classList.remove("hidden");
+        if (localStorage.getItem("gameProcess")) document.querySelector("#load").disabled = false;
+    }
 }
 
 function getGlobalScoreData(level) {

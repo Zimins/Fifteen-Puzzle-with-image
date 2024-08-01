@@ -143,8 +143,8 @@ button:disabled {
     display: flex;
     flex-wrap: wrap;
     position: relative;
-    width: 30vw;
-    height: 30vw;
+    width: 60vw;
+    height: 60vw;
     min-width: 300px;
     min-height: 300px;
     margin: 10px auto;
